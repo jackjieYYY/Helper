@@ -1,0 +1,82 @@
+services:
+
+  redroid1:
+      command:
+      - redroid.width=90
+      - redroid.height=45
+      - redroid.fps=20
+      - redroid.enable_built_in_display = 0
+      - ro.sf.lcd_density=10
+      - redroid.gpu.mode=guest
+      - ro.secure=0
+      image: redroid/redroid:11.0.0-arm64
+      ports:
+      - 5555:5555
+      privileged: true
+      volumes:
+      - ./1:/data
+      - ~/Resource/Android/data:/data/media/0/Android/data
+      environment:
+      - TZ=Asia/Shanghai
+
+
+  redroid2:
+      command:
+      - redroid.width=90
+      - redroid.height=45
+      - redroid.fps=20
+      - redroid.enable_built_in_display = 0
+      - ro.sf.lcd_density=10
+      - redroid.gpu.mode=guest
+      - ro.secure=0
+      image: redroid/redroid:11.0.0-arm64
+      ports:
+      - 5556:5555
+      privileged: true
+      volumes:
+      - ./2:/data
+      - ~/Resource/Android/data:/data/media/0/Android/data
+      environment:
+      - TZ=Asia/Shanghai
+
+
+  redroid3:
+      command:
+      - redroid.width=90
+      - redroid.height=45
+      - redroid.fps=20
+      - redroid.enable_built_in_display = 0
+      - ro.sf.lcd_density=10
+      - redroid.gpu.mode=guest
+      - ro.secure=0
+      image: redroid/redroid:11.0.0-arm64
+      ports:
+      - 5557:5555
+      privileged: true
+      volumes:
+      - ./3:/data
+      - ~/Resource/Android/data:/data/media/0/Android/data
+      environment:
+      - TZ=Asia/Shanghai
+
+
+  redroid4:
+      command:
+      - redroid.width=90
+      - redroid.height=45
+      - redroid.fps=20
+      - redroid.enable_built_in_display = 0
+      - ro.sf.lcd_density=10
+      - redroid.gpu.mode=guest
+      - ro.secure=0
+      image: redroid/redroid:11.0.0-arm64
+      ports:
+      - 5558:5555
+      privileged: true
+      volumes:
+      - ./4:/data
+      - ~/Resource/Android/data:/data/media/0/Android/data
+      environment:
+      - TZ=Asia/Shanghai
+
+

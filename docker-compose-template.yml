@@ -1,0 +1,18 @@
+  redroid_id:
+      command:
+      - redroid.width=redroidwidth
+      - redroid.height=redroidheight
+      - redroid.fps=redroidfps
+      - redroid.enable_built_in_display = 0
+      - ro.sf.lcd_density=10
+      - redroid.gpu.mode=guest
+      - ro.secure=0
+      image: image-arch-replace
+      ports:
+      - redroidport:5555
+      privileged: true
+      volumes:
+      - ./_id:/data
+      - ~/Resource/Android/data:/data/media/0/Android/data
+      environment:
+      - TZ=Asia/Shanghai
