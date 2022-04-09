@@ -133,118 +133,86 @@ func StopGame(number int) error {
 	return nil
 }
 
-func Ping(number int, needScreenshot int, nodeName string) error {
+func Surveillance(number int, needScreenshot int, nodeName string) error {
+
+	//获取当前的android
 	devices, err := connectRedroid(number)
 	if err != nil {
 		return err
 	}
-	for i := 0; i < 6; i++ {
-		for _, device := range devices {
-			cmdOutput, err := device.RunCommand("exec nc 127.0.0.1 36891")
-			Post("测试" + nodeName + "连通性 : " + cmdOutput)
-			if strings.Contains(cmdOutput, "pong") {
-				continue
-			}
-			if err != nil {
-				Post("测试" + nodeName + "连通性 exec nc 127.0.0.1 36891 遭遇错误 " + err.Error())
-				continue
-			}
-			//need to stop
-			err = runRedroidCMD(device, "killall com.hypergryph.arknights")
-			if err != nil {
-				Post("测试" + nodeName + "连通性 killall com.hypergryph.arknights 遭遇错误 " + err.Error())
-				continue
-			}
-			time.Sleep(time.Second * 5)
-			//and restart
-			Surveillance(number, needScreenshot, nodeName)
-
-		}
-
-	}
-	return nil
-}
-
-func Surveillance(number int, needScreenshot int, nodeName string) error {
-
-	for i := 0; i < 6; i++ {
-		devices, err := connectRedroid(number)
+	//启动netcat
+	for _, device := range devices {
+		cmdOutput, err := device.RunCommand("pidof netcat")
 		if err != nil {
 			return err
 		}
-		for _, device := range devices {
-			cmdOutput, err := device.RunCommand("pidof netcat")
+		if cmdOutput == "" {
+			err = runRedroidCMD(device, "nohup netcat -s 127.0.0.1 -p 36889 -L /system/bin/sh > /dev/null 2>&1 &")
 			if err != nil {
-				return err
-			}
-			if cmdOutput == "" {
-				err = runRedroidCMD(device, "nohup netcat -s 127.0.0.1 -p 36889 -L /system/bin/sh > /dev/null 2>&1 &")
-				if err != nil {
-					Post(fmt.Sprintf("[%s] 启动netcat出错 ", nodeName))
-					Post(err.Error())
-					os.Exit(-1)
-				}
+				Post(fmt.Sprintf("[%s] 启动netcat出错 ", nodeName))
+				Post(err.Error())
+				os.Exit(-1)
 			}
 		}
-
-		for _, device := range devices {
-			cmdOutput, err := runRedroidCMD_OutPut(device, "timeout 2 sh -c 'exec nc 127.0.0.1 36891'")
-			PostToMe("测试" + nodeName + "连通性 : " + cmdOutput)
-			if strings.Contains(cmdOutput, "pong") {
-				continue
-			}
-			if err != nil {
-				Post("测试" + nodeName + "连通性 exec nc 127.0.0.1 36891 遭遇错误 " + err.Error())
-				continue
-			}
-			//need to stop
-			err = runRedroidCMD(device, "killall com.hypergryph.arknights")
-			if err != nil {
-				Post("测试" + nodeName + "连通性 killall com.hypergryph.arknights 遭遇错误 " + err.Error())
-				continue
-			}
-
-		}
-		time.Sleep(time.Second * 2)
-		for index, device := range devices {
-			cmdOutput, err := device.RunCommand("pidof com.hypergryph.arknights")
-			if err != nil {
-				return err
-			}
-			if cmdOutput == "" {
-				ahargs := AhArgs{
-					NodeName:       nodeName,
-					InstanceId:     index + 1,
-					NeedScreenshot: needScreenshot,
-				}
-
-				buf := new(bytes.Buffer)
-				enc := json.NewEncoder(buf)
-				enc.SetEscapeHTML(false)
-				_ = enc.Encode(ahargs)
-
-				if err != nil {
-					fmt.Println(err)
-					return err
-				}
-				_, err = device.RunCommand("mkdir -p /data/local/logs")
-				if err != nil {
-					fmt.Println(err)
-					return err
-				}
-
-				cmdOutput, err = Cmd("/root/redroid/helper.sh GameStart " + strconv.Itoa(index+1) + " " + nodeName + " " + strconv.Itoa(needScreenshot))
-				if err != nil {
-					Post(fmt.Sprintf("[%s] 启动游戏出错 redroid ID : %s ", nodeName, strconv.Itoa(index+1)))
-					Post(fmt.Sprintf("CMD命令返回 : %s ", cmdOutput))
-					Post(fmt.Sprintf("err : %s ", err.Error()))
-				}
-				time.Sleep(time.Second * 10)
-			}
-		}
-
-		time.Sleep(time.Second * 9)
 	}
+	// 4月6日新加 需要修复
+	// exec nc 127.0.0.1 36891 用于 检查连通性
+	// timeout 2 超过两秒就当超时
+	for _, device := range devices {
+		cmdOutput, err := runRedroidCMD_OutPut(device, "timeout 2 sh -c 'exec nc 127.0.0.1 36891'")
+		if strings.Contains(cmdOutput, "pong") {
+			continue
+		}
+		if err != nil {
+			Post(nodeName + "连通性 exec nc 127.0.0.1 36891 遭遇错误" + err.Error() + cmdOutput)
+			continue
+		}
+		//need to stop
+		err = runRedroidCMD(device, "killall com.hypergryph.arknights")
+		if err != nil {
+			Post("测试" + nodeName + "连通性 killall com.hypergryph.arknights 遭遇错误 " + err.Error())
+			continue
+		}
+	}
+	time.Sleep(time.Second * 1)
+	//检查游戏是否在运行
+	for index, device := range devices {
+		cmdOutput, err := device.RunCommand("pidof com.hypergryph.arknights")
+		if err != nil {
+			return err
+		}
+		if cmdOutput == "" {
+			ahargs := AhArgs{
+				NodeName:       nodeName,
+				InstanceId:     index + 1,
+				NeedScreenshot: needScreenshot,
+			}
+
+			buf := new(bytes.Buffer)
+			enc := json.NewEncoder(buf)
+			enc.SetEscapeHTML(false)
+			_ = enc.Encode(ahargs)
+
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			_, err = device.RunCommand("mkdir -p /data/local/logs")
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+
+			cmdOutput, err = Cmd("/root/redroid/helper.sh GameStart " + strconv.Itoa(index+1) + " " + nodeName + " " + strconv.Itoa(needScreenshot))
+			if err != nil {
+				Post(fmt.Sprintf("[%s] 启动游戏出错 redroid ID : %s ", nodeName, strconv.Itoa(index+1)))
+				Post(fmt.Sprintf("CMD命令返回 : %s ", cmdOutput))
+				Post(fmt.Sprintf("err : %s ", err.Error()))
+			}
+		}
+	}
+
+	time.Sleep(time.Second * 8)
 
 	return nil
 }

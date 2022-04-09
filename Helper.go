@@ -9,6 +9,13 @@ import (
 
 func main() {
 
+	defer func() { // 必须要先声明defer，否则不能捕获到panic异常
+		if err := recover(); err != nil {
+			models.UnLock()
+			models.Post("[Go] Helper 捕获到异常: " + err.(string))
+		}
+	}()
+
 	if len(os.Args) == 1 {
 		os.Exit(-1)
 	}
@@ -119,8 +126,8 @@ func main() {
 			os.Exit(-1)
 		}
 		models.NodeReportStart(nodeName, nodeNumber)
-		models.ResVersionCheck(nodeName,number)
-		models.ArkHookJSCheck(nodeName,number)
+		models.ResVersionCheck(nodeName, number)
+		models.ArkHookJSCheck(nodeName, number)
 		models.Surveillance(number, needScreenshot, nodeName)
 		models.UnLock()
 	}
