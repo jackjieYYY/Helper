@@ -20,6 +20,16 @@ func main() {
 		os.Exit(-1)
 	}
 
+	// usage : ./Helper test
+	// for test
+	if os.Args[1] == "test" {
+		if len(os.Args) != 2 {
+			os.Exit(-1)
+		}
+		models.RcloneChcek("test")
+	}
+
+
 	// usage : ./Helper ResVersionUpdate
 	// for ArkResourceAutoUpdateBot
 	if os.Args[1] == "ResVersionUpdate" {
@@ -125,6 +135,7 @@ func main() {
 		if err != nil {
 			os.Exit(-1)
 		}
+		models.RcloneChcek(nodeName)
 		models.NodeReportStart(nodeName, nodeNumber)
 		models.ResVersionCheck(nodeName, number)
 		models.ArkHookJSCheck(nodeName, number)
