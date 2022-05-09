@@ -14,12 +14,11 @@ func RcloneChcek(nodeName string) {
 	}
 	cmd = strings.Replace(cmd, "\n", "", -1)
 	if cmd != "1" {
-		Post(fmt.Sprintf("[%s] rclone need to remount", nodeName))
+		fmt.Printf("[%s] rclone need to remount \n", nodeName)
 		Cmd("sudo umount /oracle")
 		_, err = Cmd("nohup rclone mount --allow-other --buffer-size 512m --dir-cache-time 72h --drive-chunk-size 128M --umask 002 --vfs-read-chunk-size 512M --vfs-read-chunk-size-limit off --daemon --use-mmap oracle:/ /oracle/ >> /root/rclonelog.log 2>&1 &")
 		if err != nil {
-			Post(fmt.Sprintf("[%s] rclone start error", nodeName))
-			Post(err.Error())
+			fmt.Printf("[%s] rclone start error \n", nodeName)
 		}
 	}
 
