@@ -9,8 +9,8 @@ func RcloneChcek(nodeName string) {
 
 	cmd, err := Cmd("[ -d '/oracle/screenshot/' ] && echo '1'")
 	if err != nil {
-		Post(fmt.Sprintf("[%s] rclone check error", nodeName))
-		Post(err.Error())
+		fmt.Printf("[%s] rclone check error\n", nodeName)
+		fmt.Println(err.Error())
 	}
 	cmd = strings.Replace(cmd, "\n", "", -1)
 	if cmd != "1" {
