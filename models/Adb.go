@@ -78,7 +78,7 @@ func RedroidInit(number int) error {
 			return err
 		}
 
-		err = runRedroidCMD(device, "pm install /data/local/1.apk")
+		err = runRedroidCMD(device, "install /data/local/1.apk")
 		if err != nil {
 			fmt.Println(err.Error())
 			return err
